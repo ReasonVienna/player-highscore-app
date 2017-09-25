@@ -1,0 +1,5 @@
+.merlin
+/node_modules/
+/lib/
+/bundledOutputs/
+npm-debug.log.*
