@@ -10,7 +10,7 @@ type action =
   | ShowUsersRoute
   | ShowUserRoute int
   | Sort sort
-  | AddUser (string, int)
+  | AddUser User.user
   | UpdateUsers (list User.user)
   | UpdateUser User.userId (string, int)
   | RemoveUser User.userId;
@@ -81,9 +81,8 @@ let make _children => {
     | ShowUsersRoute => ReasonReact.Update {...state, route: UsersRoute}
     | ShowUserRoute id => ReasonReact.Update {...state, route: UserRoute id}
     /* User specific actions */
-    | AddUser (name, points) =>
-      let newUser: User.user = {id: getNextId state.users, name, points};
-      ReasonReact.Update {...state, users: List.append state.users [newUser]}
+    | AddUser user =>
+      ReasonReact.Update {...state, users: List.append state.users [user]}
     | UpdateUsers users => ReasonReact.Update {...state, users}
     | UpdateUser id (name, points) =>
       let users =
@@ -160,8 +159,8 @@ let make _children => {
             fun (name, points) =>
               UserDataRepo.save (name, points) |>
               Js.Promise.then_ (
-                fun _user => {
-                  reduce (fun () => AddUser (name, points)) ();
+                fun user => {
+                  reduce (fun () => AddUser user) ();
                   Js.Promise.resolve ()
                 }
               ) |> ignore
