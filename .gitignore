@@ -1,5 +1,6 @@
 .merlin
 /node_modules/
 /lib/
-/bundledOutputs/
+/public/bundle.js
 npm-debug.log.*
+db.json
