@@ -27,9 +27,16 @@ let edit (name, points) _event => Update (name, points);
 
 let component = ReasonReact.reducerComponent "User";
 
-let make ::points ::onSave ::onDelete ::name _children => {
+let make
+    ::points
+    ::onSave
+    ::onDelete
+    ::name
+    ::addMode=false
+    ::router=?
+    _children => {
   ...component,
-  initialState: fun () => None,
+  initialState: fun () => addMode ? Some (name, points) : None,
   reducer: fun action state =>
     switch action {
     | Update (name, points) => ReasonReact.Update (Some (name, points))
@@ -77,16 +84,33 @@ let make ::points ::onSave ::onDelete ::name _children => {
             value=(string_of_int points)
             onChange=(
               reduce (
-                fun event => UpdatePoints (int_of_string (getValue event))
+                fun event => {
+                  let newValue = getValue event;
+                  if (newValue === "") {
+                    UpdatePoints 0
+                  } else {
+                    let newPoints =
+                      try (int_of_string newValue) {
+                      | Failure "int_of_string" => points
+                      };
+                    UpdatePoints newPoints
+                  }
+                }
               )
             )
           />
         </div>
         <div style=cellStyle>
           <button onClick=(reduce (fun _event => Save))> (se "Save") </button>
-          <button onClick=(reduce (fun _event => ToggleEdit))>
-            (se "Cancel")
-          </button>
+          (
+            if addMode {
+              <span> (se "") </span>
+            } else {
+              <button onClick=(reduce (fun _event => ToggleEdit))>
+                (se "Cancel")
+              </button>
+            }
+          )
         </div>
       </div>
     | None =>

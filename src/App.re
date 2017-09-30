@@ -1,3 +1,5 @@
+open Router;
+
 open Styles;
 
 let se = ReasonReact.stringToElement;
@@ -7,17 +9,16 @@ type sort =
   | Desc;
 
 type action =
+  /* route actions */
   | ShowUsersRoute
   | ShowUserRoute int
+  | ShowAddUserRoute
+  /* other actions */
   | Sort sort
   | AddUser User.user
   | UpdateUsers (list User.user)
   | UpdateUser User.userId (string, int)
   | RemoveUser User.userId;
-
-type routes =
-  | UsersRoute
-  | UserRoute int;
 
 type state = {
   users: list User.user,
@@ -48,17 +49,7 @@ let sortUsers {users, sort} =>
 
 let component = ReasonReact.reducerComponent "Main";
 
-let initRouter reduce => {
-  let router = DirectorRe.makeRouter {"/": "users", "/user/:user_id": "user"};
-  let handlers = {
-    "users": fun () => reduce (fun _ => ShowUsersRoute),
-    "user": fun (user_id: string) =>
-      reduce (fun _ => ShowUserRoute (int_of_string user_id))
-  };
-  DirectorRe.configure router {"html5history": false, "resource": handlers};
-  DirectorRe.init router "/";
-  router
-};
+let router = ref None;
 
 let make _children => {
   ...component,
@@ -72,7 +63,14 @@ let make _children => {
         Js.Promise.resolve ()
       }
     ) |> ignore;
-    let router = initRouter self.reduce;
+    /* define router handlers */
+    let handlers = {
+      users: fun () => self.reduce (fun _ => ShowUsersRoute) (),
+      user: fun (user_id: string) =>
+        self.reduce (fun _ => ShowUserRoute (int_of_string user_id)) (),
+      addUser: fun () => self.reduce (fun _ => ShowAddUserRoute) ()
+    };
+    router := Some (initRouter handlers);
     ReasonReact.NoUpdate
   },
   reducer: fun action state =>
@@ -80,9 +78,14 @@ let make _children => {
     /* route specific actions */
     | ShowUsersRoute => ReasonReact.Update {...state, route: UsersRoute}
     | ShowUserRoute id => ReasonReact.Update {...state, route: UserRoute id}
+    | ShowAddUserRoute => ReasonReact.Update {...state, route: AddUserRoute}
     /* User specific actions */
     | AddUser user =>
-      ReasonReact.Update {...state, users: List.append state.users [user]}
+      ReasonReact.Update {
+        ...state,
+        users: List.append state.users [user],
+        route: UsersRoute
+      }
     | UpdateUsers users => ReasonReact.Update {...state, users}
     | UpdateUser id (name, points) =>
       let users =
@@ -107,34 +110,37 @@ let make _children => {
   render: fun {state, reduce} => {
     let listed = sortUsers state;
     <div>
-      <h1> (se "User High Score!") </h1>
-      (
-        switch state.sort {
-        | Asc =>
-          <div>
-            (se "Sorted by Points Asc")
-            <button onClick=(reduce (fun _evt => Sort Desc))>
-              (se "Sort Points Desc")
-            </button>
-          </div>
-        | Desc =>
-          <div>
-            (se "Sorted by Points Desc")
-            <button onClick=(reduce (fun _evt => Sort Asc))>
-              (se "Sort Points Asc")
-            </button>
-          </div>
-        }
-      )
-      <hr />
       (
         switch state.route {
         | UsersRoute =>
-          <UserList
-            onSave=(fun id => reduce (update id))
-            onDelete=(fun id => reduce (delete id))
-            users=listed
-          />
+          <div>
+            <h1> (se "User High Score!") </h1>
+            (
+              switch state.sort {
+              | Asc =>
+                <div>
+                  (se "Sorted by Points Asc")
+                  <button onClick=(reduce (fun _evt => Sort Desc))>
+                    (se "Sort Points Desc")
+                  </button>
+                </div>
+              | Desc =>
+                <div>
+                  (se "Sorted by Points Desc")
+                  <button onClick=(reduce (fun _evt => Sort Asc))>
+                    (se "Sort Points Asc")
+                  </button>
+                </div>
+              }
+            )
+            <hr />
+            <UserList
+              onSave=(fun id => reduce (update id))
+              onDelete=(fun id => reduce (delete id))
+              users=listed
+            />
+            <a href="#/addUser"> (se "Add User") </a>
+          </div>
         | UserRoute id =>
           try {
             let {name, points}: User.user =
@@ -148,25 +154,34 @@ let make _children => {
           } {
           | Not_found => <div> (se "No User found.") </div>
           }
+        | AddUserRoute =>
+          <div style=rowStyle>
+            <h2> (se "Add User") </h2>
+            <User
+              name=""
+              points=0
+              onDelete=(fun _event => ())
+              router
+              addMode=true
+              onSave=(
+                fun (name, points) =>
+                  UserDataRepo.save (name, points) |>
+                  Js.Promise.then_ (
+                    fun user => {
+                      reduce (fun () => AddUser user) ();
+                      switch !router {
+                      | Some router => DirectorRe.setRoute router "/"
+                      | None => ()
+                      };
+                      Js.Promise.resolve ()
+                    }
+                  ) |> ignore
+              )
+            />
+            <a href="#"> (se "Back to User List") </a>
+          </div>
         }
       )
-      <div style=rowStyle>
-        <User
-          name=""
-          points=0
-          onDelete=(fun _event => ())
-          onSave=(
-            fun (name, points) =>
-              UserDataRepo.save (name, points) |>
-              Js.Promise.then_ (
-                fun user => {
-                  reduce (fun () => AddUser user) ();
-                  Js.Promise.resolve ()
-                }
-              ) |> ignore
-          )
-        />
-      </div>
     </div>
   }
 };

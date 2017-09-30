@@ -1,11 +1,27 @@
-/* let initRouter reduce => {
-     let router = DirectorRe.makeRouter {"/": "users", "/user/:user_id": "user"};
-     let handlers = {
-       "users": fun () => reduce (fun _ => ShowUsersRoute),
-       "user": fun (user_id: string) =>
-         reduce (fun _ => ShowUserRoute (int_of_string user_id))
-     };
-     DirectorRe.configure router {"html5history": false, "resource": handlers};
-     DirectorRe.init router "/";
-     router
-   }; */
+type routes =
+  | UsersRoute
+  | UserRoute int
+  | AddUserRoute;
+
+type handlers = {
+  users: unit => unit,
+  user: string => unit,
+  addUser: unit => unit
+};
+
+let initRouter handlers => {
+  let router =
+    DirectorRe.makeRouter {
+      "/": "users",
+      "/user/:user_id": "user",
+      "/addUser": "addUser"
+    };
+  let handlers = {
+    "users": handlers.users,
+    "user": handlers.user,
+    "addUser": handlers.addUser
+  };
+  DirectorRe.configure router {"html5history": false, "resource": handlers};
+  DirectorRe.init router "/";
+  router
+};
