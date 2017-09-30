@@ -1,0 +1,15 @@
+{
+  "name": "reason-tutorial-example-user-highscore-app",
+  "reason": {"react-jsx": 2},
+  "bs-dependencies":[
+    "reason-react",
+    "bs-json",
+    "bs-fetch",
+    "bs-director"
+  ],
+  "sources": [
+    {
+      "dir": "src"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "name": "User A",
+      "points": 100,
+      "id": 1
+    },
+    {
+      "name": "User B",
+      "points": 75,
+      "id": 2
+    },
+    {
+      "name": "User C",
+      "points": 125,
+      "id": 3
+    },
+    {
+      "name": "wqweqwe",
+      "points": 0,
+      "id": 4
+    }
+  ]
+}
