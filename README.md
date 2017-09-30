@@ -25,3 +25,5 @@ To run the server type the following command in a third tab:
 ```javascript
 npm run serve
 ```
+
+Then go to `http://localhost:3000/` and start working on the App.
