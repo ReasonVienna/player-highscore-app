@@ -1,6 +1,6 @@
 type routes =
   | UsersRoute
-  | UserRoute int
+  | UserRoute(int)
   | AddUserRoute;
 
 type handlers = {
@@ -9,19 +9,11 @@ type handlers = {
   addUser: unit => unit
 };
 
-let initRouter handlers => {
+let initRouter = (handlers) => {
   let router =
-    DirectorRe.makeRouter {
-      "/": "users",
-      "/user/:user_id": "user",
-      "/addUser": "addUser"
-    };
-  let handlers = {
-    "users": handlers.users,
-    "user": handlers.user,
-    "addUser": handlers.addUser
-  };
-  DirectorRe.configure router {"html5history": false, "resource": handlers};
-  DirectorRe.init router "/";
+    DirectorRe.makeRouter({"/": "users", "/user/:user_id": "user", "/addUser": "addUser"});
+  let handlers = {"users": handlers.users, "user": handlers.user, "addUser": handlers.addUser};
+  DirectorRe.configure(router, {"html5history": false, "resource": handlers});
+  DirectorRe.init(router, "/");
   router
 };

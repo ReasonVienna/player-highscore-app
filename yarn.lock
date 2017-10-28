@@ -356,9 +356,16 @@ bs-json@^0.2.1:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/bs-json/-/bs-json-0.2.3.tgz#a7761467b78d130f83713a99cf5514e61aca3611"
 
-bs-platform@^1.9.1:
-  version "1.9.2"
-  resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-1.9.2.tgz#19e1f3a0331ffbcf416c5c1b883fdf656aac18b8"
+bs-loader@^1.8.2:
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/bs-loader/-/bs-loader-1.8.2.tgz#efd19d56b14d8e0c8bb18283045e7f04427d6cab"
+  dependencies:
+    loader-utils "^1.1.0"
+    read-bsconfig "^1.0.1"
+
+bs-platform@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-2.0.0.tgz#17ee607fa829f67b8b920438ebca5ec1deab3276"
 
 buffer-indexof@^1.0.0:
   version "1.1.1"
@@ -2531,6 +2538,12 @@ read-all-stream@^3.0.0:
   dependencies:
     pinkie-promise "^2.0.0"
     readable-stream "^2.0.0"
+
+read-bsconfig@^1.0.1:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/read-bsconfig/-/read-bsconfig-1.0.3.tgz#bc43e73b8db5fcaff1e0994d3a55dc41d1318e44"
+  dependencies:
+    json5 "^0.5.1"
 
 read-pkg-up@^1.0.1:
   version "1.0.1"

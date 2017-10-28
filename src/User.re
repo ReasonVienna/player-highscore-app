@@ -10,90 +10,86 @@ type user = {
   points: int
 };
 
-let getValue event => (
-                        event |> ReactEventRe.Form.target |> ReactDOMRe.domElementToObj
-                      )##value;
+let getValue = (event) => (
+                            event
+                            |> ReactEventRe.Form.target
+                            |> ReactDOMRe.domElementToObj
+                          )##value;
 
-type state = option (string, int);
+type state = option((string, int));
 
 type action =
-  | Update (string, int)
-  | UpdateName string
-  | UpdatePoints int
+  | Update((string, int))
+  | UpdateName(string)
+  | UpdatePoints(int)
   | Save
   | ToggleEdit;
 
-let edit (name, points) _event => Update (name, points);
+let edit = ((name, points), _event) => Update((name, points));
 
-let component = ReasonReact.reducerComponent "User";
+let component = ReasonReact.reducerComponent("User");
 
-let make
-    ::points
-    ::onSave
-    ::onDelete
-    ::name
-    ::addMode=false
-    ::router=?
-    _children => {
+let make = (~points, ~onSave, ~onDelete, ~name, ~addMode=false, _children) => {
   ...component,
-  initialState: fun () => addMode ? Some (name, points) : None,
-  reducer: fun action state =>
+  initialState: () => addMode ? Some((name, points)) : None,
+  reducer: (action, state) =>
     switch action {
-    | Update (name, points) => ReasonReact.Update (Some (name, points))
-    | UpdateName name =>
+    | Update((name, points)) => ReasonReact.Update(Some((name, points)))
+    | UpdateName(name) =>
       switch state {
-      | Some (_name, points) => ReasonReact.Update (Some (name, points))
+      | Some((_name, points)) => ReasonReact.Update(Some((name, points)))
       | None => ReasonReact.NoUpdate
       }
-    | UpdatePoints points =>
+    | UpdatePoints(points) =>
       switch state {
-      | Some (name, _points) => ReasonReact.Update (Some (name, points))
+      | Some((name, _points)) => ReasonReact.Update(Some((name, points)))
       | None => ReasonReact.NoUpdate
       }
     | Save =>
       switch state {
-      | Some (name, points) =>
-        ReasonReact.UpdateWithSideEffects
-          None
+      | Some((name, points)) =>
+        ReasonReact.UpdateWithSideEffects(
+          None,
           (
-            fun self => {
-              onSave (name, points);
-              self.reduce (fun () => ToggleEdit) ()
+            (self) => {
+              onSave((name, points));
+              self.reduce(() => ToggleEdit, ())
             }
           )
+        )
       | None => ReasonReact.NoUpdate
       }
     | ToggleEdit =>
       switch state {
-      | Some _ => ReasonReact.Update None
-      | None => ReasonReact.Update (Some (name, points))
+      | Some(_) => ReasonReact.Update(None)
+      | None => ReasonReact.Update(Some((name, points)))
       }
     },
-  render: fun {state, reduce} =>
+  render: ({state, reduce}) =>
     switch state {
-    | Some (name, points) =>
+    | Some((name, points)) =>
       <div style=rowStyle>
         <div style=cellStyle>
           <input
             value=name
-            onChange=(reduce (fun event => UpdateName (getValue event)))
+            onChange=(reduce((event) => UpdateName(getValue(event))))
           />
         </div>
         <div style=cellStyle>
           <input
-            value=(string_of_int points)
+            value=(string_of_int(points))
             onChange=(
-              reduce (
-                fun event => {
-                  let newValue = getValue event;
+              reduce(
+                (event) => {
+                  let newValue = getValue(event);
                   if (newValue === "") {
-                    UpdatePoints 0
+                    UpdatePoints(0)
                   } else {
                     let newPoints =
-                      try (int_of_string newValue) {
-                      | Failure "int_of_string" => points
+                      try (int_of_string(newValue)) {
+                      | Failure("int_of_string") => points
                       };
-                    UpdatePoints newPoints
+                    UpdatePoints(newPoints)
                   }
                 }
               )
@@ -101,13 +97,13 @@ let make
           />
         </div>
         <div style=cellStyle>
-          <button onClick=(reduce (fun _event => Save))> (se "Save") </button>
+          <button onClick=(reduce((_event) => Save))> (se("Save")) </button>
           (
-            if addMode {
-              <span> (se "") </span>
+            if (addMode) {
+              <span> (se("")) </span>
             } else {
-              <button onClick=(reduce (fun _event => ToggleEdit))>
-                (se "Cancel")
+              <button onClick=(reduce((_event) => ToggleEdit))>
+                (se("Cancel"))
               </button>
             }
           )
@@ -115,11 +111,13 @@ let make
       </div>
     | None =>
       <div style=rowStyle>
-        <div style=cellStyle> (se name) </div>
-        <div style=cellStyle> (se (string_of_int points)) </div>
+        <div style=cellStyle> (se(name)) </div>
+        <div style=cellStyle> (se(string_of_int(points))) </div>
         <div style=cellStyle>
-          <button onClick=(reduce (edit (name, points)))> (se "Edit") </button>
-          <button onClick=(fun _event => onDelete ())> (se "Remove") </button>
+          <button onClick=(reduce(edit((name, points))))>
+            (se("Edit"))
+          </button>
+          <button onClick=((_event) => onDelete())> (se("Remove")) </button>
         </div>
       </div>
     }
