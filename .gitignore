@@ -4,3 +4,4 @@
 /public/bundle.js
 npm-debug.log.*
 db.json
+.bsb.lock
