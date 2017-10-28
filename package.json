@@ -8,7 +8,7 @@
     "clean": "bsb -clean-world",
     "serve": "json-server --watch db.json",
     "example": "npm run serve && npm run dev",
-    "test": "echo \"Error: no test specified\"  && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "bs-director": "^0.0.4",
