@@ -25,8 +25,6 @@ type action =
   | Save
   | ToggleEdit;
 
-let edit = ((name, points), _event) => Update((name, points));
-
 let component = ReasonReact.reducerComponent("User");
 
 let make = (~points, ~onSave, ~onDelete, ~name, ~addMode=false, _children) => {
@@ -114,7 +112,7 @@ let make = (~points, ~onSave, ~onDelete, ~name, ~addMode=false, _children) => {
         <div style=cellStyle> (se(name)) </div>
         <div style=cellStyle> (se(string_of_int(points))) </div>
         <div style=cellStyle>
-          <button onClick=(reduce(edit((name, points))))>
+          <button onClick=(reduce((_event) => Update((name, points))))>
             (se("Edit"))
           </button>
           <button onClick=((_event) => onDelete())> (se("Remove")) </button>
